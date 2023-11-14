@@ -66,7 +66,7 @@ app.use('/images',express.static(path.join(__dirname, 'userimages')));
 
 
 if( BUILD === "prod"){
-let staticpath = path.resolve('www/observable-demo');
+let staticpath = path.resolve('www');
 app.use('/',express.static(staticpath, { redirect: false }));
 
 }
@@ -93,7 +93,12 @@ async function main() {
         await client.connect();
         let db = client.db("demo-app");
         console.log("DB connected");
-    
+        database.ListCollectionNames().ToList().Contains("cars"); 
+        if (collectionExists == false) { 
+            let importcars = fs.readFileSync('data/demo-app-cars.json');
+            const result = await foods.insertMany(importcars, { ordered: true }); 
+        //insert records from json file
+        }
         //POST Route for uploading images.
         require('./routes/api-uploads.js')(app,formidable,fs,path);
 
@@ -111,7 +116,7 @@ async function main() {
 
         if( BUILD === "prod"){
         app.get('*',function (req, res, next) {
-            res.sendFile(path.resolve(path.join(__dirname, 'www/observable-demo/index.html')));
+            res.sendFile(path.resolve(path.join(__dirname, 'www/index.html')));
           });
         }
         // // Start the server listening on port 3000. Output message to console once server has started.(diagnostic only)
