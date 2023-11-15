@@ -8,6 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-detail',
   standalone: true,
+  
   imports: [CommonModule,FormsModule],
   templateUrl: './detail.component.html',
   styleUrls: ['./detail.component.css']
@@ -15,6 +16,7 @@ import { ToastrService } from 'ngx-toastr';
 export class DetailComponent implements OnInit{
   @ViewChild('editdialog') editdialog!:ElementRef;
   car:Car = <Car>{};
+  activesave= true;
   make:string = "";
   model:string = "";
   year:number = 0;
@@ -25,24 +27,36 @@ export class DetailComponent implements OnInit{
   ngOnInit(): void {
       this.dataservice.currentcar$.subscribe({
         next: (data)=>{
-         this.car = data;
-         this.make = this.car.make || ''; 
-         this.model = this.car.model || '';  
-         this.year = this.car.year || 0;
-         this.color = this.car.color || '';    
+         this.car = data;  
          }
       })
       
   }
-  opendialog(){
+  // opendialog(){
    
-    if (Object.keys(this.car).length !==0){
-      this.editdialog.nativeElement.showModal();
-    }else{
-      this.toastr.error('Select and Item', 'Select an item to edit first.');
-    }
+  //   if (Object.keys(this.car).length !==0){
+  //     this.editdialog.nativeElement.showModal();
+  //   }else{
+  //     this.toastr.error('Select and Item', 'Select an item to edit first.');
+  //   }
+  // }
+  // closedialog(){
+    
+  //   this.editdialog.nativeElement.close();
+  // }
+  updatecar(){
+    console.log('update car');
+    this.dataservice.updatecar(this.car).subscribe({
+      next: (data)=>{
+        this.toastr.success('Car Updated', '');
+        this.activesave = true;
+       }
+    })
   }
-  closedialog(){
-    this.editdialog.nativeElement.close();
+  activatebutton(){
+    console.log('activate');
+    if(this.car.id){
+    this.activesave = false;
+     }
   }
 }

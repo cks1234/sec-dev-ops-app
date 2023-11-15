@@ -43,7 +43,7 @@ var corsOptions = {
     optionsSuccessStatus: 200 ,
     methods:['GET','POST'],
   }
-  console.log(corsOptions);
+  
 app.use(cors(corsOptions));
 app.disable("x-powered-by");
 
@@ -92,13 +92,17 @@ async function main() {
        
         await client.connect();
         let db = client.db("demo-app");
-        console.log("DB connected");
-        database.ListCollectionNames().ToList().Contains("cars"); 
-        if (collectionExists == false) { 
-            let importcars = fs.readFileSync('data/demo-app-cars.json');
-            const result = await foods.insertMany(importcars, { ordered: true }); 
-        //insert records from json file
-        }
+        //check if collection exists
+        const collections = await db.listCollections().toArray();
+        const exists = collections.map(c => c.name).includes('cars');
+        debug(exists);
+           if (exists == false) { 
+            //import initial data if the collection did not exist.
+             let importcars =  JSON.parse(fs.readFileSync(path.join(__dirname, 'data/demo-app-cars3.json')));
+            
+              const result = await db.collection('cars').insertMany(importcars, { ordered: true }); 
+       
+         }
         //POST Route for uploading images.
         require('./routes/api-uploads.js')(app,formidable,fs,path);
 
@@ -113,6 +117,9 @@ async function main() {
 
         // GET Route for getting all car data
         require('./routes/api-data-cars.js')(app,db);
+        
+        // POST Route for updating a cars data
+        require('./routes/api-cars-update.js')(app,db);
 
         if( BUILD === "prod"){
         app.get('*',function (req, res, next) {
@@ -128,3 +135,9 @@ async function main() {
     }
     
 }main().catch(console.error);
+
+function debug(v){
+    if(BUILD === 'dev'){
+        console.log(v);
+    }
+}

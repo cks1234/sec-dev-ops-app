@@ -27,8 +27,7 @@ setcurrentcar(car:Car){
   }
 
 
-  update(car:Car){
-   
+  updatecar(car:Car){
       return this.http.post<Car>(server +'/api/updatecar', {car: car});
     }
 
