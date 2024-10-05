@@ -4,7 +4,7 @@ require('dotenv').config()
 const PORT = process.env.PORT || 3000;
 const DEVPORT = process.env.DEVPORT || 4200;
 const SERVER = process.env.SERVER || "https://localhost";
-const BUILD = process.env.BUILD || "prod"; 
+const BUILD = process.env.BUILD || "prod";
 const DEVSERVER = process.env.DEVSERVER || "http://localhost";
 const MONDODB_URL = process.env.MONDODB_URL || "mongodb://127.0.0.1:27017";
 
@@ -39,11 +39,12 @@ if( BUILD === "prod"){
 
 //MiddleWare
 var corsOptions = {
-    origin: originserver,
+    origin: '*',
     optionsSuccessStatus: 200 ,
     methods:['GET','POST'],
+    credentials: true
   }
-  
+
 app.use(cors(corsOptions));
 app.disable("x-powered-by");
 
@@ -74,7 +75,7 @@ app.use('/',express.static(staticpath, { redirect: false }));
 
     const io = require('socket.io')(https,{
          cors:{
-           origin: originserver,
+           origin: '*',
               methods:["GET","POST"],
           }
     });

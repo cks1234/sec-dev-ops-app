@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-express
+  labels:
+    app: mongo-express
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-express
+  template:
+    metadata:
+      labels:
+        app: mongo-express
+    spec:
+      containers:
+      - name: mongo-express
+        image: mongo-express:latest
+        ports:
+        - containerPort: 8081
+        env:
+        - name: ME_CONFIG_MONGODB_SERVER
+          value: "mongo-service"
+        - name: ME_CONFIG_MONGODB_PORT
+          value: "27017"
+        - name: ME_CONFIG_SITE_SSL_ENABLED
+          value: "true"
+        - name: ME_CONFIG_MONGODB_ENABLE_ADMIN
+          value: "true"
+        - name: ME_CONFIG_SITE_SSL_CRT_PATH
+          value: /etc/ssl/certs/localhost.crt
+        - name: ME_CONFIG_SITE_SSL_KEY_PATH
+          value: /etc/ssl/keys/localhost.key
+        volumeMounts:
+        - name: ssl-certificates
+          mountPath: /etc/ssl/certs/localhost.crt
+          subPath: localhost.crt
+        - name: ssl-keys
+          mountPath: /etc/ssl/keys/localhost.key
+          subPath: localhost.key
+      volumes:
+      - name: ssl-certificates
+        configMap:
+          name: ssl-config
+          items:
+            - key: localhost.crt
+              path: localhost.crt
+      - name: ssl-keys
+        configMap:
+          name: ssl-config
+          items:
+            - key: localhost.key
+              path: localhost.key
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-express
+spec:
+  selector:
+    app: mongo-express
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+  type: LoadBalancer

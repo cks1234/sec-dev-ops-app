@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        volumeMounts:
+        - name: ssl-certificates
+          mountPath: /etc/nginx/ssl/certs/localhost.crt
+          subPath: localhost.crt
+        - name: ssl-keys
+          mountPath: /etc/nginx/ssl/keys/localhost.key
+          subPath: localhost.key
+        - name: nginx-config-volume
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+      volumes:
+      - name: ssl-certificates
+        configMap:
+          name: ssl-config
+      - name: ssl-keys
+        configMap:
+          name: ssl-config
+      - name: nginx-config-volume
+        configMap:
+          name: nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: nginx
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 443

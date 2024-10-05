@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: angular-server-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: angular-server
+  template:
+    metadata:
+      labels:
+        app: angular-server
+    spec:
+      containers:
+      - name: angular-server
+        image: kube-angular-server:latest
+        ports:
+        - containerPort: 3000
+        imagePullPolicy: Never
+        env:
+        - name: MONDODB_URL
+          value: "mongodb://mongo-service:27017"
+        volumeMounts:
+        - name: ssl-certificates
+          mountPath: /usr/src/app/ssl
+      volumes:
+      - name: ssl-certificates
+        configMap:
+          name: ssl-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: angular-server-service
+spec:
+  type: ClusterIP
+  selector:
+    app: angular-server
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000
